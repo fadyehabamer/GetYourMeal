@@ -1,0 +1,2 @@
+# Foolish
+Funnier fungi hehe
