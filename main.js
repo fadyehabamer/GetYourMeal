@@ -6,6 +6,8 @@ const recipeCloseBtn = document.getElementById('recipe-close-btn');
 
 
 searchBtn.addEventListener('input', getMealList);
+// the magnifier button was not wired up; let it (re)run the search, e.g. after a network error
+document.getElementById('search-btn').addEventListener('click', getMealList);
 mealList.addEventListener('click', getMealRecipe);
 recipeCloseBtn.addEventListener('click', () => {
     mealDetailsContent.parentElement.classList.remove('showRecipe');
