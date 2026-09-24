@@ -6,15 +6,31 @@ const recipeCloseBtn = document.getElementById('recipe-close-btn');
 
 
 searchBtn.addEventListener('input', getMealList);
+// the magnifier button was not wired up; let it (re)run the search, e.g. after a network error
+document.getElementById('search-btn').addEventListener('click', getMealList);
 mealList.addEventListener('click', getMealRecipe);
 recipeCloseBtn.addEventListener('click', () => {
     mealDetailsContent.parentElement.classList.remove('showRecipe');
 });
+// Escape closes the recipe pop-up as well
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mealDetailsContent.parentElement.classList.contains('showRecipe')) {
+        recipeCloseBtn.click();
+    }
+});
+
+let latestRequest = 0;
 
 function getMealList() {
-    fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${searchBtn.value}`)
-        .then(response => response.json())
+    // results can arrive out of order while the user types; only render the newest one
+    const requestId = ++latestRequest;
+    fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchBtn.value.trim())}`)
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.json();
+        })
         .then(data => {
+            if (requestId !== latestRequest) return;
             let html = ''
             if (data.meals) {
                 data.meals.forEach(meal => {
@@ -22,7 +38,7 @@ function getMealList() {
                         `
                     <div class = "meal-item" data-id = "${meal.idMeal}">
                         <div class = "meal-img">
-                            <img src = "${meal.strMealThumb}" alt = "food">
+                            <img src = "${meal.strMealThumb}" alt = "${meal.strMeal}">
                         </div>
                         <div class = "meal-name">
                             <h3>${meal.strMeal}</h3>
@@ -38,6 +54,11 @@ function getMealList() {
             }
 
             mealList.innerHTML = html;
+        })
+        .catch(() => {
+            if (requestId !== latestRequest) return;
+            mealList.innerHTML = "Sorry, we couldn't reach the recipe service. Please try again.";
+            mealList.classList.add('notFound');
         });
 }
 
@@ -46,16 +67,23 @@ function getMealRecipe(e) {
     e.preventDefault();
     if (e.target.classList.contains('recipe-btn')) {
         let mealItem = e.target.parentElement.parentElement;
-        console.log(mealItem)
-        fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealItem.dataset.id}`)
-            .then(response => response.json())
-            .then(data => mealRecipeModal(data.meals));
+        fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${encodeURIComponent(mealItem.dataset.id)}`)
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                if (!data.meals) throw new Error('Meal not found');
+                mealRecipeModal(data.meals);
+            })
+            .catch(() => {
+                alert("Sorry, we couldn't load this recipe. Please try again.");
+            });
     }
 }
 
 function mealRecipeModal(meal) {
     meal = meal[0];
-    console.log(meal);
     let html = `
         <h2 class = "recipe-title">${meal.strMeal}</h2>
         <p class = "recipe-category">${meal.strCategory}</p>
@@ -64,12 +92,14 @@ function mealRecipeModal(meal) {
             <p>${meal.strInstructions}</p>
         </div>
         <div class = "recipe-meal-img">
-            <img src = "${meal.strMealThumb}" alt = "">
+            <img src = "${meal.strMealThumb}" alt = "${meal.strMeal}">
         </div>
+        ${meal.strYoutube ? `
         <div class = "recipe-link">
-            <a href = "${meal.strYoutube}" target = "_blank">Watch Video</a>
-        </div>
+            <a href = "${meal.strYoutube}" target = "_blank" rel = "noopener">Watch Video</a>
+        </div>` : ''}
     `;
     mealDetailsContent.innerHTML = html;
     mealDetailsContent.parentElement.classList.add('showRecipe');
+    recipeCloseBtn.focus();
 }

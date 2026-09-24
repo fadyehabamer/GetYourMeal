@@ -368,3 +368,12 @@ body {
         grid-template-columns: repeat(3, 1fr);
     }
 }
+
+/* keyboard focus: the buttons and search field set outline: 0, so give keyboard users a visible ring */
+.btn:focus-visible,
+.search-control:focus-visible,
+.recipe-btn:focus-visible,
+.recipe-link a:focus-visible {
+    outline: 3px solid var(--tenne-tawny);
+    outline-offset: 2px;
+}
