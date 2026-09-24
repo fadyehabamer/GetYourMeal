@@ -59,7 +59,6 @@ function getMealRecipe(e) {
     e.preventDefault();
     if (e.target.classList.contains('recipe-btn')) {
         let mealItem = e.target.parentElement.parentElement;
-        console.log(mealItem)
         fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${encodeURIComponent(mealItem.dataset.id)}`)
             .then(response => {
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -77,7 +76,6 @@ function getMealRecipe(e) {
 
 function mealRecipeModal(meal) {
     meal = meal[0];
-    console.log(meal);
     let html = `
         <h2 class = "recipe-title">${meal.strMeal}</h2>
         <p class = "recipe-category">${meal.strCategory}</p>
