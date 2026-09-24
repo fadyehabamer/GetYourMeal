@@ -32,7 +32,7 @@ function getMealList() {
                         `
                     <div class = "meal-item" data-id = "${meal.idMeal}">
                         <div class = "meal-img">
-                            <img src = "${meal.strMealThumb}" alt = "food">
+                            <img src = "${meal.strMealThumb}" alt = "${meal.strMeal}">
                         </div>
                         <div class = "meal-name">
                             <h3>${meal.strMeal}</h3>
@@ -86,7 +86,7 @@ function mealRecipeModal(meal) {
             <p>${meal.strInstructions}</p>
         </div>
         <div class = "recipe-meal-img">
-            <img src = "${meal.strMealThumb}" alt = "">
+            <img src = "${meal.strMealThumb}" alt = "${meal.strMeal}">
         </div>
         <div class = "recipe-link">
             <a href = "${meal.strYoutube}" target = "_blank">Watch Video</a>
