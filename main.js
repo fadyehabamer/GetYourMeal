@@ -12,6 +12,12 @@ mealList.addEventListener('click', getMealRecipe);
 recipeCloseBtn.addEventListener('click', () => {
     mealDetailsContent.parentElement.classList.remove('showRecipe');
 });
+// Escape closes the recipe pop-up as well
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mealDetailsContent.parentElement.classList.contains('showRecipe')) {
+        recipeCloseBtn.click();
+    }
+});
 
 let latestRequest = 0;
 
@@ -95,4 +101,5 @@ function mealRecipeModal(meal) {
     `;
     mealDetailsContent.innerHTML = html;
     mealDetailsContent.parentElement.classList.add('showRecipe');
+    recipeCloseBtn.focus();
 }
