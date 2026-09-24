@@ -11,10 +11,15 @@ recipeCloseBtn.addEventListener('click', () => {
     mealDetailsContent.parentElement.classList.remove('showRecipe');
 });
 
+let latestRequest = 0;
+
 function getMealList() {
-    fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${searchBtn.value}`)
+    // results can arrive out of order while the user types; only render the newest one
+    const requestId = ++latestRequest;
+    fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchBtn.value.trim())}`)
         .then(response => response.json())
         .then(data => {
+            if (requestId !== latestRequest) return;
             let html = ''
             if (data.meals) {
                 data.meals.forEach(meal => {
@@ -47,7 +52,7 @@ function getMealRecipe(e) {
     if (e.target.classList.contains('recipe-btn')) {
         let mealItem = e.target.parentElement.parentElement;
         console.log(mealItem)
-        fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealItem.dataset.id}`)
+        fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${encodeURIComponent(mealItem.dataset.id)}`)
             .then(response => response.json())
             .then(data => mealRecipeModal(data.meals));
     }
