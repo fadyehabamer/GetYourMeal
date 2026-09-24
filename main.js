@@ -17,7 +17,10 @@ function getMealList() {
     // results can arrive out of order while the user types; only render the newest one
     const requestId = ++latestRequest;
     fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchBtn.value.trim())}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.json();
+        })
         .then(data => {
             if (requestId !== latestRequest) return;
             let html = ''
@@ -43,6 +46,11 @@ function getMealList() {
             }
 
             mealList.innerHTML = html;
+        })
+        .catch(() => {
+            if (requestId !== latestRequest) return;
+            mealList.innerHTML = "Sorry, we couldn't reach the recipe service. Please try again.";
+            mealList.classList.add('notFound');
         });
 }
 
@@ -53,8 +61,17 @@ function getMealRecipe(e) {
         let mealItem = e.target.parentElement.parentElement;
         console.log(mealItem)
         fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${encodeURIComponent(mealItem.dataset.id)}`)
-            .then(response => response.json())
-            .then(data => mealRecipeModal(data.meals));
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                if (!data.meals) throw new Error('Meal not found');
+                mealRecipeModal(data.meals);
+            })
+            .catch(() => {
+                alert("Sorry, we couldn't load this recipe. Please try again.");
+            });
     }
 }
 
